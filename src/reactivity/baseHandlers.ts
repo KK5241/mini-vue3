@@ -1,7 +1,7 @@
 import { track, trigger } from "./effect";
 import { reactive, ReactiveFlags, readonly } from "./reactive";
 
-function createGetter(isReadonly = false) {
+function createGetter(isReadonly = false, shallow = false) {
   return function get(target, key) {
     //判断是不是reactive  isReactive API
     if (key === ReactiveFlags.IS_REACTIVE) {
@@ -12,6 +12,7 @@ function createGetter(isReadonly = false) {
       return isReadonly;
     }
     const res = target[key];
+    if(shallow) return res
     //依赖收集
     if (!isReadonly) track(target, key);
 
@@ -39,3 +40,6 @@ export const readonlyHandlers = {
     return true;
   },
 };
+export const shallowReadonlyHandlers = Object.assign({},readonlyHandlers,{
+  get:createGetter(true,true),
+})
