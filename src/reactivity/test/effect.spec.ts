@@ -71,7 +71,9 @@ describe("effect", () => {
     // 目前如果这里用 obj.foo ++ 的还是会存在问题，他会错误的把之前的依赖函数收集起来
     obj.foo = 3
     expect(dummy).toBe(3)
+    obj.foo ++ 
+    expect(dummy).toBe(3)
     runner()
-    expect(dummy).toBe(4)
+    expect(dummy).toBe(5)
   })
 });
