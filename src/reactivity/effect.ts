@@ -28,7 +28,7 @@ function cleanEffect(effect) {
   });
 }
 
-function isTracking(){
+export function isTracking(){
   return shouldTrack && activeEffect
 }
 let depsMap = new WeakMap();
@@ -40,16 +40,29 @@ export const track = function (target, key) {
   if (!deps) depsMap.set(target, (deps = new Map()));
   let dep = deps.get(key);
   if (!dep) deps.set(key, (dep = new Set()));
-
-  dep.add(activeEffect);
-  activeEffect.arr.push(dep);
+ 
+  //对响应式变量收集依赖函数 并对依赖函数收集dep
+  trackEffects(dep)
 };
+
+export function trackEffects(dep){
+  if(!dep.has(activeEffect)){
+    dep.add(activeEffect);
+    activeEffect.arr.push(dep);
+  }
+}
 //派发更新函数
 export const trigger = function (target, key) {
   const deps = depsMap.get(target);
   if (!deps) return;
   const dep = deps.get(key);
   if (!dep) return;
+  
+  //遍历dep触发依赖函数
+  triggerEffects(dep)
+};
+
+export function triggerEffects(dep){
   dep.forEach((element) => {
     if (element.scheduler) {
       element.scheduler();
@@ -57,7 +70,7 @@ export const trigger = function (target, key) {
       element.run();
     }
   });
-};
+}
 
 export const effect = function (fn, options: any = {}) {
   const scheduler = options.scheduler;

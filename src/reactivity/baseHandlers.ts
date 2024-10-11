@@ -1,3 +1,4 @@
+import { isObject } from "../shared/src";
 import { track, trigger } from "./effect";
 import { reactive, ReactiveFlags, readonly } from "./reactive";
 
@@ -16,7 +17,7 @@ function createGetter(isReadonly = false, shallow = false) {
     //依赖收集
     if (!isReadonly) track(target, key);
 
-    if (Object(res) === res) return isReadonly ? readonly(res) : reactive(res); //做深度响应式处理
+    if (isObject(res)) return isReadonly ? readonly(res) : reactive(res); //做深度响应式处理
     return res;
   };
 }
