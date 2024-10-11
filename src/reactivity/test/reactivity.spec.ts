@@ -1,4 +1,4 @@
-import { isReactive, reactive } from "../reactive"
+import { isProxy, isReactive, reactive } from "../reactive"
 
 describe('reactivity',()=>{
     it('happy path',()=>{
@@ -11,5 +11,7 @@ describe('reactivity',()=>{
         expect(isReactive(newObj.arr)).toBe(true)
         expect(isReactive(newObj.x)).toBe(true)
         expect(isReactive(newObj.arr[0])).toBe(true)
+        expect(isProxy(newObj.x)).toBe(true)
     })
 })
+
