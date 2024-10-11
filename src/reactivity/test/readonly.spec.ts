@@ -9,10 +9,13 @@ describe('readonly',()=>{
     })
     it('warn then call set',()=>{
         console.warn = jest.fn()
-        const readOnlyObj = readonly({foo:1})
+        const readOnlyObj = readonly({foo:1, arr:[{foo:1}], obj:{x:2}})
         readOnlyObj.foo = 10
         expect(console.warn).toHaveBeenCalled()
         expect(isReadonly(readOnlyObj)).toBe(true)
         expect(isReadonly({foo:1})).toBe(false)
+        expect(isReadonly(readOnlyObj.arr)).toBe(true)
+        expect(isReadonly(readOnlyObj.arr[0])).toBe(true)
+        expect(isReadonly(readOnlyObj.obj)).toBe(true)
     })
 })

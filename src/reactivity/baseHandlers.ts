@@ -1,19 +1,22 @@
 import { track, trigger } from "./effect";
-import { ReactiveFlags } from "./reactive";
+import { reactive, ReactiveFlags, readonly } from "./reactive";
 
 function createGetter(isReadonly = false) {
   return function get(target, key) {
-    //判断是不是reactive
-    if(key === ReactiveFlags.IS_REACTIVE){
-        return !isReadonly
+    //判断是不是reactive  isReactive API
+    if (key === ReactiveFlags.IS_REACTIVE) {
+      return !isReadonly;
     }
-    //判断是不是readonly
-    if(key === ReactiveFlags.IS_READONLY){
-        return isReadonly
+    //判断是不是readonly isReadonly API
+    if (key === ReactiveFlags.IS_READONLY) {
+      return isReadonly;
     }
+    const res = target[key];
     //依赖收集
     if (!isReadonly) track(target, key);
-    return target[key];
+
+    if (Object(res) === res) return isReadonly ? readonly(res) : reactive(res); //做深度响应式处理
+    return res;
   };
 }
 function createSetter() {
