@@ -1,7 +1,8 @@
 let activeEffect; //effect辅助函数
 let shouldTrack; //是否收集依赖
 
-class ReactiveEffect {
+//effect 和 ReactiveEffect 都用来实现依赖收集逻辑
+export class ReactiveEffect {
   arr = [];
   active = true; // 避免多次调用stop后重复运行代码
   constructor(public fn, public scheduler?) {}
