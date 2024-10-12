@@ -12,7 +12,7 @@ function createGetter(isReadonly = false, shallow = false) {
     if (key === ReactiveFlags.IS_READONLY) {
       return isReadonly;
     }
-    const res = target[key];
+    const res = Reflect.get(target,key);
     if(shallow) return res
     //依赖收集
     if (!isReadonly) track(target, key);
@@ -23,7 +23,7 @@ function createGetter(isReadonly = false, shallow = false) {
 }
 function createSetter() {
   return function set(target, key, value) {
-    target[key] = value;
+    Reflect.set(target,key,value)
     //派发更新
     trigger(target, key);
     return true;
