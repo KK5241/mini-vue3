@@ -1,4 +1,4 @@
-import { createVNode } from "./createVnode";
+import { createVNode } from "./createVNode";
 import { render } from "./render";
 
 export function createApp(rootComponent) {
