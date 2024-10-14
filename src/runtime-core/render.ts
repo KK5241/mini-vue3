@@ -1,4 +1,5 @@
 import { isObject } from "../shared/src/index";
+import { ShapeFlags } from "../shared/src/shapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 
 export function render(vNode, container) {
@@ -6,9 +7,10 @@ export function render(vNode, container) {
 }
 function patch(vNode, container) {
   //存在两种可能 一种是组件  一种是element元素
-  if (typeof vNode.type === "string") {
+  const {shapeFlag} = vNode
+  if (shapeFlag & ShapeFlags.ELEMENT) {
     processElement(vNode, container);
-  } else if (isObject(vNode.type)) {
+  } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
     processComponent(vNode, container);
   }
 }
@@ -22,14 +24,13 @@ function processElement(vNode, container) {
 function mountElement(vNode, container) {
   // 递归遍历的时候为每个虚拟DOM 绑定当前的元素
   const el = (vNode.el = document.createElement(vNode.type));
-  const { props, children } = vNode;
+  const { props, children,shapeFlag } = vNode;
 
   //为真实DOM el设置属性
   setAttributes(el, props);
-
-  if (typeof children === "string") {
+  if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
     el.textContent = children;
-  } else if (Array.isArray(children)) {
+  } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
     mountChildren(vNode, el);
   }
   container.append(el);
