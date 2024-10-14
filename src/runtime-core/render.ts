@@ -20,7 +20,8 @@ function processElement(vNode, container) {
   //update
 }
 function mountElement(vNode, container) {
-  const el = document.createElement(vNode.type);
+  // 递归遍历的时候为每个虚拟DOM 绑定当前的元素
+  const el = (vNode.el = document.createElement(vNode.type));
   const { props, children } = vNode;
 
   //为真实DOM el设置属性
@@ -43,13 +44,17 @@ function mountComponent(vNode, container) {
 
   setupComponent(instance);
 
-  setupRenderEffect(instance, container);
+  setupRenderEffect(instance, vNode, container);
 }
 
-function setupRenderEffect(instance, container) {
-  const subTree = instance.render();
+function setupRenderEffect(instance, vNode, container) {
+  const { proxy } = instance;
+  const subTree = instance.render.call(proxy);
   //递归调用patch进一步操作组件内的元素
   patch(subTree, container);
+  //subTree 是组件第一次拆箱的结果 也就是根元素的虚拟DOM  
+  //这里是将组件的 el 绑定为根元素的 el 
+  vNode.el = subTree.el
 }
 
 //处理elementVnode中child为数组的情况

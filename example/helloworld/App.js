@@ -2,25 +2,19 @@ import {
     h
 } from '../../lib/mini-vue.esm.js'
 
+window.self = null
 export const App = {
     render() {
+        window.self = this
+        //这里是给 h 函数传递参数，参数中的this使用的时render的this，render中的this会在调用的时候绑定
         return h('div', {
             id: 'root'
-        }, [
-            h('h1', {
-                id: 'h1',
-                class: 'red'
-            }, '我是h1标签'),
-            h('p', {
-                id: 'p',
-                class: 'blue'
-            }, '我是p标签')
-        ])
+        }, [h('h1',{},'123')])
     },
 
     setup() {
         return {
-            msg: 'mini-vue'
+            msg: 'mini-vue!~!'
         }
     }
 }
