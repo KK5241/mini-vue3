@@ -7,3 +7,8 @@ export function isObject(value) {
 export function hasChange(newValue, oldValue) {
   return Object.is(newValue, oldValue);
 }
+
+// 判断某个对象自身是否包含某个key
+export const hasOwn = (obj,key)=>{
+  return Object.prototype.hasOwnProperty.call(obj,key)
+}

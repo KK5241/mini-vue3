@@ -1,11 +1,15 @@
+import { hasOwn } from "../shared/src/index";
+
 const publicePropertiesMap = {
     $el:(i)=>i.vNode.el
 }
 export const publiceInstanceProxyHandlers = {
   get({_:instance}, key) {
-    const { setupState } = instance;
-    if (key in setupState) {
+    const { setupState, props } = instance;
+    if (hasOwn(setupState, key)) {
       return setupState[key];
+    }else if(hasOwn(props,key)){
+      return props[key]
     }
     
     const publiceGetter = publicePropertiesMap[key]

@@ -1,3 +1,5 @@
+import { shallowReadonly } from "../reactivity/reactive";
+import { initProps } from "./componentProps";
 import { publiceInstanceProxyHandlers } from "./componentPubliceInstance";
 
 export function createComponentInstance(vNode) {
@@ -11,7 +13,7 @@ export function createComponentInstance(vNode) {
 
 export function setupComponent(instance) {
   //TODO
-  //initProps()
+  initProps(instance,instance.vNode.props)
   //initSlots()
 
   setupStatefulComponent(instance);
@@ -28,7 +30,7 @@ function setupStatefulComponent(instance) {
 
   if (setup) {
     //返回的结果有可能是Object 有可能是 Function
-    const setupResult = setup();
+    const setupResult = setup(shallowReadonly(instance.props));
 
     handleSetupResult(instance, setupResult);
   }
