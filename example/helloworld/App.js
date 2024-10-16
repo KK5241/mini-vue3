@@ -15,7 +15,23 @@ export const App = {
             onMousedown(){
                 console.log('mouseDown');
             }
-        }, [h('h1',{},'123'),h(Foo,{count:1})])
+        }, [
+            h('h1',{},'123'),
+            h(Foo,
+                {
+                    count:1,
+                    onAdd(a,b){
+                        console.log('我触发了emit',a,b);        
+                    },
+                    onSum(a,b){
+                        console.log(a + b);
+                    },
+                    onSumAdd(a,b){
+                        console.log(a,b);
+                    }
+                }
+            )
+        ])
     },
 
     setup() {
