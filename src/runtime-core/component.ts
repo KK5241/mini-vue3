@@ -4,6 +4,7 @@ import { initProps } from "./componentProps";
 import { publiceInstanceProxyHandlers } from "./componentPubliceInstance";
 import { initSlots } from "./componentSlots";
 
+let currentInstance = null
 export function createComponentInstance(vNode) {
   const component = {
     vNode,
@@ -38,7 +39,12 @@ function setupStatefulComponent(instance) {
 
   if (setup) {
     //返回的结果有可能是Object 有可能是 Function
+
+    //这里包装成函数的目的是为了断掉调试，如果直接赋值，出问题后不知道是哪里赋值出的问题，封装成函数之后所有的赋值都走函数
+    //我们就可以通过打断点的方式来进行调试
+    setCurrentInstance(instance)
     const setupResult = setup(shallowReadonly(instance.props), instance);
+    setCurrentInstance(null)
 
     handleSetupResult(instance, setupResult);
   }
@@ -56,4 +62,12 @@ function finishComponentSetup(instance) {
   if (component.render) {
     instance.render = component.render;
   }
+}
+
+export function getCurrentInstance(){
+  return currentInstance
+}
+
+function setCurrentInstance(newInstance){
+  currentInstance = newInstance
 }
