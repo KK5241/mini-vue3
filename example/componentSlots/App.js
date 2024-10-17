@@ -4,6 +4,7 @@ import {
 import {
     Foo
 } from './Foo.js'
+import { createTextVNode } from '../../lib/mini-vue.esm.js'
 window.self = null
 export const App = {
     render() {
@@ -13,7 +14,7 @@ export const App = {
             h('h1', {}, [h('h1',{},'123')]),
             h(Foo, {count: 1}, {
                 header:({count1}) => h('p', {}, 'header' + count1),
-                footer:() => h('p', {}, 'footer')
+                footer:() => [h('p', {}, 'footer'),createTextVNode('mmm')]
                 //默认插槽 应该是自动将其添加到defalut键中
             })
         ])

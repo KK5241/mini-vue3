@@ -1,18 +1,48 @@
 import { isObject } from "../shared/src/index";
 import { ShapeFlags } from "../shared/src/shapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
+import { FRAGMENT, TEXT } from "./createVNode";
 
 export function render(vNode, container) {
   patch(vNode, container);
 }
 function patch(vNode, container) {
   //存在两种可能 一种是组件  一种是element元素
-  const { shapeFlag } = vNode;
-  if (shapeFlag & ShapeFlags.ELEMENT) {
-    processElement(vNode, container);
-  } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-    processComponent(vNode, container);
-  }
+  //添加其他可能出现的情况
+  // 1. 当是纯文本节点时  processText
+  // 2. 去掉每个slot外面套的div标签 processFragment
+  switch (vNode.type) {
+    case FRAGMENT:
+      processFragment(vNode,container);
+      break;
+    case TEXT:
+      processText(vNode,container);
+      break;
+    default:
+      const { shapeFlag } = vNode;
+      if (shapeFlag & ShapeFlags.ELEMENT) {
+        processElement(vNode, container);
+      } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+        processComponent(vNode, container);
+      }
+      break;
+    }
+}
+function processFragment(vNode,container){
+  mountFragment(vNode,container)
+}
+
+function mountFragment(vNode,container){
+  mountChildren(vNode,container)
+}
+
+function processText(vNode,container) {
+  mountText(vNode,container)
+}
+
+function mountText(vNode,container){
+  const el = (vNode.el = document.createTextNode(vNode.children))
+  container.append(el)
 }
 
 function processElement(vNode, container) {
@@ -28,7 +58,7 @@ function mountElement(vNode, container) {
 
   //为真实DOM el设置属性
   setAttributes(el, props);
-  
+
   //children 只能是文本或者数组
   //children 如果是数组的话 数组里面必须是虚拟DOM不能是文本
   if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
@@ -74,15 +104,15 @@ function setAttributes(el: any, props: any) {
       const val = props[key];
       // 当props是注册事件时通过这种方式注册，利用小步骤思想，具体 -> 抽象
       // on + 事件名（这里的首字母要大写）
-      //判断的时候可以用正则，处理的时候切割+转化小写 
+      //判断的时候可以用正则，处理的时候切割+转化小写
       // if (key === "onClick") {
       //   el.addEventListener("click", val);
       //}
-      const isMatch = /^on[A-Z]/.test(key)
-      if(isMatch){
-        const transformEvent = key.slice(2).toLocaleLowerCase()
-        el.addEventListener(transformEvent,val)
-      }else{
+      const isMatch = /^on[A-Z]/.test(key);
+      if (isMatch) {
+        const transformEvent = key.slice(2).toLocaleLowerCase();
+        el.addEventListener(transformEvent, val);
+      } else {
         el.setAttribute(key, val);
       }
     }

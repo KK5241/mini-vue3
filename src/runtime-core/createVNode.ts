@@ -1,5 +1,8 @@
 import { ShapeFlags } from "../shared/src/shapeFlags";
 
+export const FRAGMENT = 'Fragment'
+export const TEXT = 'text'
+
 export function createVNode(type, props?, children?) {
   const vNode = {
     type,
@@ -26,4 +29,9 @@ function getShapeFlag(type: any) {
   return typeof type === "string"
     ? ShapeFlags.ELEMENT
     : ShapeFlags.STATEFUL_COMPONENT;
+}
+
+// 创建一个纯文本的vnode
+export function createTextVNode(text){
+  return createVNode(TEXT,{},text)
 }
