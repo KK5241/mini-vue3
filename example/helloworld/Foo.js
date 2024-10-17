@@ -3,6 +3,7 @@ export const Foo = {
     render(){
        return h('div',{},'foo:' + this.count)
     },
+    // setup 是在初始化的时候被调用的
     setup(props, {emit}){
         console.log(props);
         props.count ++

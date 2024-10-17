@@ -28,6 +28,9 @@ function mountElement(vNode, container) {
 
   //为真实DOM el设置属性
   setAttributes(el, props);
+  
+  //children 只能是文本或者数组
+  //children 如果是数组的话 数组里面必须是虚拟DOM不能是文本
   if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
     el.textContent = children;
   } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {

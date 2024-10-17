@@ -1,7 +1,8 @@
 import { hasOwn } from "../shared/src/index";
 
 const publicePropertiesMap = {
-    $el:(i)=>i.vNode.el
+    $el:(i)=>i.vNode.el,
+    $slots:(i)=>i.slots
 }
 export const publiceInstanceProxyHandlers = {
   get({_:instance}, key) {

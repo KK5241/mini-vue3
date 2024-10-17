@@ -2,20 +2,26 @@ import { shallowReadonly } from "../reactivity/reactive";
 import { emit } from "./ComponentEmit";
 import { initProps } from "./componentProps";
 import { publiceInstanceProxyHandlers } from "./componentPubliceInstance";
+import { initSlots } from "./componentSlots";
 
 export function createComponentInstance(vNode) {
   const component = {
     vNode,
     type: vNode.type,
+    props:{},
+    slots:{},
     setupState: {},
+    emit: () => {}
   };
   return component;
 }
 
 export function setupComponent(instance) {
   //TODO
-  initProps(instance,instance.vNode.props)
-  //initSlots()
+  const {props, children} = instance.vNode
+  initProps(instance, props)
+
+  initSlots(instance, children)
 
   setupStatefulComponent(instance);
 }
