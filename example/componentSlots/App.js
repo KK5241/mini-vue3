@@ -17,7 +17,7 @@ export const App = {
             h(Foo, {count: 1}, {
                 header:({count1}) => h('p', {}, 'header' + count1),
                 footer:() => [h('p', {}, 'footer'),createTextVNode('mmm')]
-                //默认插槽 应该是自动将其添加到defalut键中
+                //默认插槽 应该是自动将其添加到default键中
             })
         ])
     },
