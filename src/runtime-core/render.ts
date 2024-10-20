@@ -1,11 +1,12 @@
 import { effect } from "../reactivity/effect";
+import { EMPTY_OBJ } from "../shared/src";
 import { ShapeFlags } from "../shared/src/shapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 import { createAppAPI } from "./createApp";
 import { FRAGMENT, TEXT } from "./createVNode";
 
 export function createRenderer(options) {
-  const { createElement, patchProps, insert } = options;
+  const { createElement: hostcreateElement, patchProps: hostpatchProps, insert: hostinsert } = options;
 
   function render(vNode, container) {
     patch(null, vNode, container, null);
@@ -60,19 +61,36 @@ export function createRenderer(options) {
   }
   // 更新
   function patchElement(n1, n2, container) {
-    console.log("patchElement");
-    console.log(n1);
-    console.log(n2);
 
     //children
 
     //props
-  }
+    const prevProps = n1.props || EMPTY_OBJ;
+    const nextProps = n2.props || EMPTY_OBJ;
 
+    const el = (n2.el = n1.el);
+    patchProps(el, prevProps, nextProps);
+  }
+  function patchProps(el, prevProps, nextProps) {
+
+    for (const key in nextProps) {
+      if (nextProps[key] !== prevProps[key]) {
+        hostpatchProps(el, key, prevProps[key], nextProps[key]);
+      }
+    }
+
+    if(prevProps !== EMPTY_OBJ){
+      for (const key in prevProps) {
+        if(!(key in nextProps)){
+          el.removeAttribute(key)
+        }
+      }
+    }
+  }
   //初始化
   function mountElement(n1, n2, container, parentComponent) {
     // 递归遍历的时候为每个虚拟DOM 绑定当前的元素
-    const el = (n2.el = createElement(n2.type));
+    const el = (n2.el = hostcreateElement(n2.type));
     const { props, children, shapeFlag } = n2;
 
     //为真实DOM el设置属性
@@ -92,7 +110,7 @@ export function createRenderer(options) {
         // } else {
         //   el.setAttribute(key, val);
         // }
-        patchProps(el, key, val);
+        hostpatchProps(el, key, null, val);
       }
     }
 
@@ -103,7 +121,7 @@ export function createRenderer(options) {
     } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
       mountChildren(n1, n2, el, parentComponent);
     }
-    insert(el, container);
+    hostinsert(el, container);
   }
 
   function processComponent(n1, n2, container, parentComponent) {

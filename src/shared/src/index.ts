@@ -36,3 +36,5 @@ export const camelize = (name) => {
 export const covertWord = (name) => {
   return "on" + capitalize(name);
 };
+
+export const EMPTY_OBJ = {}
