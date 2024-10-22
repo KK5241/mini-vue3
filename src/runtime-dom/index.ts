@@ -11,18 +11,29 @@ export function patchProps(el, key, preVal, nextVal) {
     el.addEventListener(transformEvent, nextVal);
   } else {
     if (nextVal === undefined || nextVal === null) {
-      el.removeAttribute(key)
+      el.removeAttribute(key);
     } else {
       el.setAttribute(key, nextVal);
     }
   }
 }
-
-function insert(el, parent) {
-  parent.append(el);
+function remove(children) {
+  const parent = children.parentNode
+  parent.removeChild(children);
 }
-
-const render: any = createRenderer({ insert, patchProps, createElement });
+function insert(el, parent, anchor) {
+  parent.insertBefore(el, anchor);
+}
+function setElementText(el, text) {
+  el.textContent = text;
+}
+const render: any = createRenderer({
+  insert,
+  patchProps,
+  createElement,
+  remove,
+  setElementText,
+});
 
 //真正使用的render在这里导出
 export function createApp(...args) {
