@@ -7,6 +7,7 @@ export function createVNode(type, props?, children?) {
   const vNode = {
     type,
     props,
+    component:null,
     children,
     key:props && props.key, // prop的key绑定在这里方便后续diff算法的比较
     shapeFlag: getShapeFlag(type),

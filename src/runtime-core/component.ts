@@ -12,6 +12,7 @@ export function createComponentInstance(vNode, parentComponent) {
     type: vNode.type,
     props: {},
     slots: {},
+    next:null,
     isMounted: false,
     subTree:{},
     parent: parentComponent,

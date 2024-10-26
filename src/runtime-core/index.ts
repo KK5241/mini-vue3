@@ -9,3 +9,5 @@ export {getCurrentInstance} from './component'
 
 export {provide,inject} from './apiProvide'
 export {createRenderer} from './render'
+
+export {nextTick} from './scheduler'

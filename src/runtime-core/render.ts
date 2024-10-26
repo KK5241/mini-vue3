@@ -4,6 +4,7 @@ import { ShapeFlags } from "../shared/src/shapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 import { createAppAPI } from "./createApp";
 import { FRAGMENT, TEXT } from "./createVNode";
+import { queueJobs } from "./scheduler";
 
 export function createRenderer(options) {
   const {
@@ -207,7 +208,6 @@ export function createRenderer(options) {
           count++;
         }
       }
-      debugger
       // 根据旧DOM中稳定的序列，生成新DOM的最长递增子序列
       const increasingNewIndexSequence = moved
         ? getSequence(newIndexToOldIndexSequence)
@@ -224,7 +224,7 @@ export function createRenderer(options) {
         // == 0  表示这个节点在旧DOM中是没有的需要调用patch创建
         if (newIndexToOldIndexSequence[i] === 0) {
           console.log(123);
-          
+
           patch(null, nextChild, container, parentComponent, anchor);
         } else if (moved) {
           if (i !== increasingNewIndexSequence[increasingSequenceIndex]) {
@@ -296,11 +296,26 @@ export function createRenderer(options) {
   }
 
   function processComponent(n1, n2, container, parentComponent, anchor) {
-    mountComponent(n2, container, parentComponent, anchor);
+    if (!n1) {
+      mountComponent(n2, container, parentComponent, anchor);
+    } else {
+      updateComponent(n1, n2);
+    }
+  }
+
+  // 重新调用render将新的vnode进行解包
+  function updateComponent(n1, n2) {
+    // 更新组件实例引用
+    const instance = (n2.component = n1.component);
+    instance.next = n2;
+    instance.update();
   }
 
   function mountComponent(vNode, container, parentComponent, anchor) {
-    const instance = createComponentInstance(vNode, parentComponent);
+    const instance = (vNode.component = createComponentInstance(
+      vNode,
+      parentComponent
+    ));
 
     setupComponent(instance);
 
@@ -308,32 +323,52 @@ export function createRenderer(options) {
   }
 
   function setupRenderEffect(instance, vNode, container, anchor) {
-    effect(() => {
-      if (!instance.isMounted) {
-        // render第一次调用 也就是初始化
-        const { proxy } = instance;
-        // instance.subTree 记录当前虚拟DOM
-        const subTree = (instance.subTree = instance.render.call(proxy));
-        //递归调用patch进一步操作组件内的元素
-        patch(null, subTree, container, instance, null);
-        //subTree 是组件第一次拆箱的结果 也就是根元素的虚拟DOM
-        //这里是将组件的 el 绑定为根元素的 el
-        vNode.el = subTree.el;
-        instance.isMounted = true;
-      } else {
-        // 响应式数据触发 新旧节点更新 重新触发render函数进行重渲染
-        const { proxy } = instance;
-        const prevSubTree = instance.subTree;
-        const subTree = (instance.subTree = instance.render.call(proxy));
-        console.log("subTree", subTree);
-        console.log("prevSubTree", prevSubTree);
+    instance.update = effect(
+      () => {
+        if (!instance.isMounted) {
+          // render第一次调用 也就是初始化
+          const { proxy } = instance;
+          // instance.subTree 记录当前虚拟DOM
+          const subTree = (instance.subTree = instance.render.call(proxy));
+          //递归调用patch进一步操作组件内的元素
+          patch(null, subTree, container, instance, null);
+          //subTree 是组件第一次拆箱的结果 也就是根元素的虚拟DOM
+          //这里是将组件的 el 绑定为根元素的 el
+          vNode.el = subTree.el;
+          instance.isMounted = true;
+        } else {
+          // 响应式数据触发 新旧节点更新 重新触发render函数进行重渲染
+          const { proxy } = instance;
 
-        // 更新的patch操作
-        patch(prevSubTree, subTree, container, instance, anchor);
+          const { next, vNode } = instance;
+          if (next) {
+            next.el = vNode.el;
+            updateComponentPreRender(instance, next);
+          }
+          const prevSubTree = instance.subTree;
+          const subTree = (instance.subTree = instance.render.call(proxy));
+          console.log("subTree", subTree);
+          console.log("prevSubTree", prevSubTree);
+
+          // 更新的patch操作
+          patch(prevSubTree, subTree, container, instance, anchor);
+        }
+      },
+      {
+        // 以异步的形式处理响应式依赖
+        scheduler() { 
+          queueJobs(instance.update)
+        },
       }
-    });
+    );
   }
 
+  function updateComponentPreRender(instance, nextVNode) {
+    nextVNode.component = instance;
+    instance.vNode = nextVNode;
+    instance.next = null;
+    instance.props = nextVNode.props;
+  }
   //处理elementVnode中child为数组的情况
   function mountChildren(
     newChild: any,
