@@ -3,6 +3,7 @@ let queue: any[] = [];
 let isFlushPedding = false;
 
 
+// nextTick 接受一个函数，利用promise.then将函数加入到微队列当中，返回一个promise
 export function nextTick(fn){
     return fn ? Promise.resolve().then(()=>{fn()}) : Promise.resolve().then() 
 }

@@ -4,7 +4,6 @@
   "description": "",
   "main": "./lib/mini-vue.cjs.js",
   "module": "./lib/mini-vue.esm.js",
-  "type": "module",
   "scripts": {
     "test": "jest",
     "build": "rollup -c rollup.config.js"
